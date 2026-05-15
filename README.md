@@ -10,7 +10,7 @@ Include the Problem Statement and Dataset.
 Image classification is a fundamental task in computer vision where an input image is assigned to one of several predefined classes. The objective of this experiment is to build and train a Convolutional Neural Network (CNN) using a labeled image dataset Fashion-MNIST and evaluate its performance using accuracy, confusion matrix, and classification report.
 
 ## Neural Network Model
-<img width="1088" height="768" alt="image" src="https://github.com/user-attachments/assets/0969c792-245a-4123-bcce-e692a6984378" />
+<img width="959" height="433" alt="WhatsApp Image 2026-05-15 at 10 32 10 AM" src="https://github.com/user-attachments/assets/c553d92d-1656-4229-8df9-5fa15506f873" />
 
 
 ## DESIGN STEPS
