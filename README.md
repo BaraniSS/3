@@ -1,57 +1,232 @@
-#Ex-3: ORM Web Application
+# Develop a Convolutional Deep Neural Network for Image Classification
 
-# Date:29.5.2025
+## AIM
+To develop a convolutional deep neural network (CNN) for image classification and to verify the response for new images.
 
-# AIM
+##   PROBLEM STATEMENT AND DATASET
+Include the Problem Statement and Dataset.
 
-To develop a Django application to store and retrieve data from a bank loan database using Object Relational Mapping(ORM).
+## THEORY
+Image classification is a fundamental task in computer vision where an input image is assigned to one of several predefined classes. The objective of this experiment is to build and train a Convolutional Neural Network (CNN) using a labeled image dataset Fashion-MNIST and evaluate its performance using accuracy, confusion matrix, and classification report.
 
-
-# ENTITY RELATIONSHIP DIAGRAM
-![393519736-4dee571b-299d-4818-aeaa-a328fc79b0b2](https://github.com/user-attachments/assets/e5ce29fc-dd69-4397-8bc1-a376b4daaee2)
+## Neural Network Model
+<img width="1088" height="768" alt="image" src="https://github.com/user-attachments/assets/0969c792-245a-4123-bcce-e692a6984378" />
 
 
 ## DESIGN STEPS
-## STEP 1:
-Clone the problem from GitHub
 
-## STEP 2:
-Create a new app in Django project
 
-## STEP 3:
-Enter the code for admin.py and models.py
+1.Load and Preprocess Data
 
-## STEP 4:
-Execute Django admin and create details for 10 books
+2.Get the shape of the first image in the training dataset
+
+3.Get the shape of the first image in the test dataset
+
+4.Train the Model
+
+5.Test the Model
+
+6.Predict on a Single Image
+
+7.Display the image
 
 ## PROGRAM
-~~~
-admin.py
 
-from django.contrib import admin 
-from .models import Employee, EmployeeAdmin 
-admin.site.register (Employee, EmployeeAdmin)
+### Name:BARANI SS
 
-models.py
+### Register Number:212224230032
 
-from django.db import models 
-from django.contrib import admin
-class Employee (models.Model):
-    eid=models.CharField(max_length=20,help_text="Employee ID")         
-    name=models.CharField(max_length=100)
-    salary=models.IntegerField()
-    age=models.IntegerField()
-    email=models. EmailField()
+```
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchvision
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
 
-class EmployeeAdmin (admin. ModelAdmin):
-    list_display=('eid', 'name', 'salary', 'age', 'email')
-~~~
-# OUTPUT
-![393369624-94b98a73-c2b6-4c8b-949d-87021d5ec283](https://github.com/user-attachments/assets/932c5a2d-e7e5-4aab-a66e-94968e8c96b5)
-![395064284-941d5f2e-2a21-4f39-8da1-d2e834886a51](https://github.com/user-attachments/assets/52dc0334-66d2-493d-bb69-58b2970b3dd8)
-![393369647-7943d4a5-772d-46c4-ad9d-3cefc1f8f1d1](https://github.com/user-attachments/assets/844ff41d-3c01-49b1-a093-9e6828669000)
-![393369685-3a8a3b5c-2dc6-4ddc-bf9d-7db243feb7b5](https://github.com/user-attachments/assets/b5bae0d1-1036-477e-af9c-ef3756f00ab6)
+## Step 1: Load and Preprocess Data
+
+# Define transformations for images
+transform = transforms.Compose([
+    transforms.ToTensor(),          # Convert images to tensors
+    transforms.Normalize((0.5,), (0.5,))  # Normalize images
+])
+
+# Load Fashion-MNIST dataset
+train_dataset = torchvision.datasets.FashionMNIST(root="./data", train=True, transform=transform, download=True)
+test_dataset = torchvision.datasets.FashionMNIST(root="./data", train=False, transform=transform, download=True)
+
+# Get the shape of the first image in the training dataset
+image, label = train_dataset[0]
+print(image.shape)
+print(len(train_dataset))
+
+# Get the shape of the first image in the test dataset
+image, label = test_dataset[0]
+print(image.shape)
+print(len(test_dataset))
+
+# Create DataLoader for batch processing
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+
+class CNNClassifier(nn.Module):
+    def __init__(self):
+        super(CNNClassifier, self).__init__()
+        self.conv1=nn.Conv2d(in_channels=1,out_channels=32,kernel_size=3,padding=1)
+        self.pool=nn.MaxPool2d(kernel_size=2,stride=2)
+        # conv2 should take 32 channels as input from conv1's output after pooling
+        self.conv2=nn.Conv2d(in_channels=32,out_channels=64,kernel_size=3,padding=1)
+        # conv3 should take 64 channels as input from conv2's output after pooling
+        self.conv3=nn.Conv2d(in_channels=64,out_channels=128,kernel_size=3,padding=1)
+        # Calculate input size for fc1: 128 channels * 3x3 feature map after 3 pooling layers
+        # (28 -> 14 -> 7 -> 3) based on kernel_size=2, stride=2
+        self.fc1=nn.Linear(128*3*3,128)
+        self.fc2=nn.Linear(128,64)
+        self.fc3=nn.Linear(64,10)
+
+    def forward(self, x):
+      x=self.pool(torch.relu(self.conv1(x)))
+      x=self.pool(torch.relu(self.conv2(x)))
+      x=self.pool(torch.relu(self.conv3(x)))
+      x=x.view(x.size(0),-1)
+      x=torch.relu(self.fc1(x))
+      x=torch.relu(self.fc2(x))
+      x=self.fc3(x)
+      return x
+
+from torchsummary import summary
+
+# Initialize model
+model = CNNClassifier()
+
+# Move model to GPU if available
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    model.to(device)
+
+# Print model summary
+print('Name: BARANI SS')
+print('Register Number: 212224230032')
+summary(model, input_size=(1, 28, 28))
+
+# Initialize model, loss function, and optimizer
+model = CNNClassifier()
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+## Step 3: Train the Model
+def train_model(model, train_loader, num_epochs=3):
+    for epoch in range(num_epochs):
+      model.train()
+      running_loss = 0.0
+      for images, labels in train_loader:
+        optimizer.zero_grad()
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        running_loss += loss.item()
+
+    print('Name:BARANI SS')
+    print('Register Number: 212224230032')
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}')
+
+# Train the model
+train_model(model, train_loader)
+
+## Step 4: Test the Model
+def test_model(model, test_loader):
+    model.eval()
+    correct = 0
+    total = 0
+    all_preds = []
+    all_labels = []
+
+    with torch.no_grad():
+        for images, labels in test_loader:
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            all_preds.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    accuracy = correct / total
+    print('Name: BARANI SS')
+    print('Register Number: 212224230032')
+    print(f'Test Accuracy: {accuracy:.4f}')
+
+    # Compute confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    plt.figure(figsize=(8, 6))
+    print('Name: BARANI SS ')
+    print('Register Number: 212224230032')
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=test_dataset.classes, yticklabels=test_dataset.classes)
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+    # Print classification report
+    print('Name: BARANI SS')
+    print('Register Number: 212224230032')
+    print("Classification Report:")
+    print(classification_report(all_labels, all_preds, target_names=test_dataset.classes))
+
+# Evaluate the model
+test_model(model, test_loader)
+## Step 5: Predict on a Single Image
+import matplotlib.pyplot as plt
+def predict_image(model, image_index, dataset):
+    model.eval()
+    image, label = dataset[image_index]
+    with torch.no_grad():
+        output = model(image.unsqueeze(0))  # Add batch dimension
+        _, predicted = torch.max(output, 1)
+    class_names = dataset.classes
+
+    # Display the image
+    print('Name: BARANI SS')
+    print('Register Number :212224230032')
+    plt.imshow(image.squeeze(), cmap="gray")
+    plt.title(f'Actual: {class_names[label]}\nPredicted: {class_names[predicted.item()]}')
+    plt.axis("off")
+    plt.show()
+    print(f'Actual: {class_names[label]}, Predicted: {class_names[predicted.item()]}')
+
+# Example Prediction
+predict_image(model, image_index=331, dataset=test_dataset)
 
 
-# RESULT
-Thus the program for creating a database using ORM hass been executed successfully
+
+```
+
+### OUTPUT
+
+## Training Loss per Epoch
+
+<img width="1539" height="1022" alt="ChatGPT Image May 15, 2026, 09_25_42 AM" src="https://github.com/user-attachments/assets/5c1ac25e-fffb-4110-8805-4bd6dc41b640" />
+
+
+## Confusion Matrix
+
+<img width="1358" height="1158" alt="ChatGPT Image May 15, 2026, 09_29_25 AM" src="https://github.com/user-attachments/assets/b7486c24-1a8f-448e-9821-3812cf2a731c" />
+
+
+
+## Classification Report
+<img width="1433" height="1098" alt="ChatGPT Image May 15, 2026, 09_31_23 AM" src="https://github.com/user-attachments/assets/d1e5fcba-d390-4199-86fe-47b865d22356" />
+
+
+### New Sample Data Prediction
+<img width="1304" height="1206" alt="ChatGPT Image May 15, 2026, 09_33_22 AM" src="https://github.com/user-attachments/assets/38498411-2cb1-4aec-baf4-2ff925cb8bfd" />
+
+
+## RESULT
+Thus , a convolutional deep neural network (CNN) for image classification and to verify the response for new images is successfully developed.
+
